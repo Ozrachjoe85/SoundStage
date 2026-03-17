@@ -1,12 +1,18 @@
-import android.view.*;
+package com.example.soundstage;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.List;
 
 public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> {
 
-    List<String> tracks;
+    public List<String> tracks;
 
     public TrackAdapter(List<String> tracks) {
         this.tracks = tracks;
@@ -35,7 +41,7 @@ public class TrackAdapter extends RecyclerView.Adapter<TrackAdapter.ViewHolder> 
 
         ViewHolder(View itemView) {
             super(itemView);
-            title = itemView.findViewById(android.R.id.text1);
+            title = itemView.findViewById(R.id.trackTitle);
         }
     }
 }
