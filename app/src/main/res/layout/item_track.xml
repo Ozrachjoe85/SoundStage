@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/text1"
-    android:background="@drawable/bg_card"
-    android:textColor="@color/md_theme_onSurface"
-    android:padding="16dp"
-    android:layout_margin="8dp"
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/trackTitle"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
+    android:layout_height="wrap_content"
+    android:textColor="@color/md_theme_onBackground"
+    android:textSize="18sp"
+    android:padding="16dp"/>
