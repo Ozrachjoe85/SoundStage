@@ -5,7 +5,6 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
-import kotlin.math.abs
 
 class VisualizerView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -30,13 +29,7 @@ class VisualizerView @JvmOverloads constructor(
             val widthPerBar = width.toFloat() / it.size
             it.forEachIndexed { i, b ->
                 val barHeight = (b + 128) * (height / 256)
-                canvas.drawLine(
-                    i * widthPerBar,
-                    height,
-                    i * widthPerBar,
-                    height - barHeight,
-                    paint
-                )
+                canvas.drawLine(i * widthPerBar, height, i * widthPerBar, height - barHeight, paint)
             }
         }
     }
