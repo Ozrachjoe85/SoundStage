@@ -1,4 +1,4 @@
-pluginManagement {
+pluginManagement { 
     repositories {
         google()
         mavenCentral()
@@ -14,4 +14,8 @@ dependencyResolutionManagement {
     }
 }
 
+// Root project name
 rootProject.name = "SoundStage"
+
+// Include your app module
+include(":app")
