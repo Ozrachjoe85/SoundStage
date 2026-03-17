@@ -1,80 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:background="@color/md_theme_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
+    <!-- Header -->
+    <TextView
+        android:text="SOUNDSTAGE"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_onBackground"
         android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
-        <!-- Header -->
+    <!-- Dial -->
+    <FrameLayout
+        android:layout_gravity="center"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="16dp">
+
+        <View
+            android:id="@+id/dial"
+            android:background="@drawable/dial_background"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
         <TextView
-            android:text="SOUNDSTAGE"
-            android:textSize="24sp"
+            android:text="PLAY"
+            android:textColor="@color/md_theme_onSurface"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_onBackground"
+            android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <!-- Now Playing Card -->
-        <LinearLayout
-            android:layout_marginTop="20dp"
-            android:background="@drawable/bg_card"
-            android:padding="16dp"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    </FrameLayout>
 
-            <TextView
-                android:text="Now Playing"
-                android:textColor="@color/md_theme_onSurface"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+    <!-- Visualizer -->
+    <include layout="@layout/view_visualizer"
+        android:layout_marginTop="20dp"/>
 
-            <TextView
-                android:text="Track Title - Artist"
-                android:textColor="@color/md_theme_secondary"
-                android:layout_marginTop="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+    <!-- Track List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerTracks"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
-        </LinearLayout>
-
-        <!-- Control Buttons -->
-        <LinearLayout
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:text="PLAY"
-                android:background="@drawable/glow_button"
-                android:textColor="@color/md_theme_onSurface"
-                android:layout_margin="8dp"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:text="STOP"
-                android:background="@drawable/glow_button"
-                android:layout_margin="8dp"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"/>
-
-            <Button
-                android:text="REC"
-                android:backgroundTint="@color/accent_red"
-                android:layout_margin="8dp"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"/>
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
