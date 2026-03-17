@@ -1,39 +1,33 @@
-name: Android Build
+name: Android CI
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        shell: bash
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 25
-      uses: actions/setup-java@v3
-      with:
-        distribution: temurin
-        java-version: 25
-        cache: gradle
+      - name: Set up Java 25
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 25
 
-    - name: Set Gradle environment
-      run: |
-        echo "GRADLE_USER_HOME=$HOME/.gradle" >> $GITHUB_ENV
+      - name: Give Gradle wrapper execute permission
+        run: chmod +x ./gradlew
 
-    - name: Build Debug APK
-      run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
 
-    - name: Upload Debug APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: debug-apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
