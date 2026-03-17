@@ -1,0 +1,2 @@
+rootProject.name = "SoundStage"
+include(":app")
