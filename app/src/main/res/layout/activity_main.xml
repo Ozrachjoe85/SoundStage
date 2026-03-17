@@ -1,42 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:background="@color/md_theme_background"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
 
-    <!-- Dial -->
-    <View
-        android:id="@+id/dial"
+    <com.autoeq.studio.ui.CircularKnobView
+        android:id="@+id/play_dial"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:layout_gravity="center"
-        android:layout_margin="16dp"
-        android:background="@drawable/dial_bg"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Visualizer -->
-    <LinearLayout
-        android:id="@+id/visualizerContainer"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:gravity="bottom"
-        android:orientation="horizontal">
-
-        <!-- Bars -->
-        <View style="@style/VisualizerBar"/>
-        <View style="@style/VisualizerBar"/>
-        <View style="@style/VisualizerBar"/>
-        <View style="@style/VisualizerBar"/>
-        <View style="@style/VisualizerBar"/>
-        <View style="@style/VisualizerBar"/>
-    </LinearLayout>
-
-    <!-- Track List -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerTracks"
-        android:layout_width="match_parent"
+        android:id="@+id/track_list"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
-
-</LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/play_dial"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
