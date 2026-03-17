@@ -1,1 +1,12 @@
-
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.SoundStage" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your theme colors, typography, etc. here -->
+        <item name="colorPrimary">@color/md_theme_primary</item>
+        <item name="colorPrimaryVariant">@color/md_theme_primary_container</item>
+        <item name="colorOnPrimary">@color/md_theme_on_primary</item>
+        <item name="colorSecondary">@color/md_theme_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_on_secondary</item>
+        <!-- add other items as needed -->
+    </style>
+</resources>
