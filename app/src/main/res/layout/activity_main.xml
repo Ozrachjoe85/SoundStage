@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/md_theme_background"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Header -->
+        <TextView
+            android:text="SOUNDSTAGE"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_onBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- Now Playing Card -->
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Now Playing"
+                android:textColor="@color/md_theme_onSurface"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Track Title - Artist"
+                android:textColor="@color/md_theme_secondary"
+                android:layout_marginTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="PLAY"
+                android:background="@drawable/glow_button"
+                android:textColor="@color/md_theme_onSurface"
+                android:layout_margin="8dp"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="STOP"
+                android:background="@drawable/glow_button"
+                android:layout_margin="8dp"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="REC"
+                android:backgroundTint="@color/accent_red"
+                android:layout_margin="8dp"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
