@@ -1,51 +1,58 @@
+package com.autoeq.studio
+
+import android.media.AudioManager
+import android.media.audiofx.Visualizer
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.autoeq.studio.databinding.ActivityMainBinding
+import kotlinx.coroutines.*
+
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var knob: CircularKnobView
-    private lateinit var visualizer: Visualizer
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var trackAdapter: TrackAdapter
+    private lateinit var binding: ActivityMainBinding
+    private var visualizer: Visualizer? = null
+    private val audioSessionId: Int
+        get() = (applicationContext.getSystemService(AudioManager::class.java) as AudioManager).mode
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        knob = findViewById(R.id.play_dial)
-        recyclerView = findViewById(R.id.track_list)
-
-        trackAdapter = TrackAdapter(getTracks())
-        recyclerView.adapter = trackAdapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
-
-        initVisualizer()
-        initKnob()
+        setupRecyclerView()
+        setupVisualizer()
     }
 
-    private fun initKnob() {
-        knob.setOnRotationChangedListener { angle ->
-            // map angle to volume or playback
-        }
-        knob.setOnTouchListener { v, event ->
-            v.scaleX = 1.1f
-            v.scaleY = 1.1f
-            v.invalidate()
-            false
-        }
+    private fun setupRecyclerView() {
+        val items = listOf(
+            "Track 1", "Track 2", "Track 3", "Track 4"
+        )
+        val adapter = TrackAdapter(items)
+        binding.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.recyclerView.adapter = adapter
     }
 
-    private fun initVisualizer() {
-        val audioSessionId = 0 // replace with actual MediaPlayer session
+    private fun setupVisualizer() {
         visualizer = Visualizer(audioSessionId).apply {
             captureSize = Visualizer.getCaptureSizeRange()[1]
             setDataCaptureListener(object : Visualizer.OnDataCaptureListener {
                 override fun onWaveFormDataCapture(
-                    visualizer: Visualizer?, waveform: ByteArray?, samplingRate: Int
-                ) { /* update bars */ }
+                    visualizer: Visualizer?, bytes: ByteArray?, samplingRate: Int
+                ) {
+                    bytes?.let { binding.visualizerView.updateVisualizer(it) }
+                }
 
                 override fun onFftDataCapture(
-                    visualizer: Visualizer?, fft: ByteArray?, samplingRate: Int
-                ) { /* update bars */ }
-            }, Visualizer.getMaxCaptureRate() / 2, true, true)
+                    visualizer: Visualizer?, bytes: ByteArray?, samplingRate: Int
+                ) { }
+            }, Visualizer.getMaxCaptureRate() / 2, true, false)
             enabled = true
         }
+    }
+
+    override fun onDestroy() {
+        visualizer?.release()
+        super.onDestroy()
     }
 }
