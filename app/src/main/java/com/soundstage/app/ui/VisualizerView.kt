@@ -1,29 +1,43 @@
-package com.soundstage.app.ui
+package com.autoeq.studio
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.drawscope.drawLine
-import androidx.compose.ui.geometry.Offset
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.util.AttributeSet
+import android.view.View
+import kotlin.math.abs
 
-@Composable
-fun VisualizerView(data: FloatArray, modifier: Modifier = Modifier) {
+class VisualizerView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : View(context, attrs) {
 
-    Canvas(modifier = modifier) {
+    private var bytes: ByteArray? = null
+    private val paint = Paint().apply {
+        color = 0xFF00FF00.toInt()
+        strokeWidth = 4f
+        isAntiAlias = true
+    }
 
-        val width = size.width
-        val height = size.height
+    fun updateVisualizer(bytes: ByteArray) {
+        this.bytes = bytes
+        invalidate()
+    }
 
-        val step = width / data.size
-
-        data.forEachIndexed { i, value ->
-            val x = i * step
-            val y = height / 2 + value * height / 2
-
-            drawLine(
-                start = Offset(x, height / 2),
-                end = Offset(x, y)
-            )
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        bytes?.let {
+            val height = height.toFloat()
+            val widthPerBar = width.toFloat() / it.size
+            it.forEachIndexed { i, b ->
+                val barHeight = (b + 128) * (height / 256)
+                canvas.drawLine(
+                    i * widthPerBar,
+                    height,
+                    i * widthPerBar,
+                    height - barHeight,
+                    paint
+                )
+            }
         }
     }
 }
