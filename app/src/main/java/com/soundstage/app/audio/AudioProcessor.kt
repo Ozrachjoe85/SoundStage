@@ -1,27 +1,21 @@
 package com.soundstage.app.audio
 
+import kotlin.math.hypot
+
 class AudioProcessor {
-
-    private val autoEq = AutoEqEngine()
-
-    fun process(input: FloatArray): Pair<FloatArray, List<EQBand>> {
-
-        val bands = autoEq.process(input)
-
-        val output = FloatArray(input.size)
-
-        for (i in input.indices) {
-            var sample = input[i]
-
-            // Apply EQ influence (very basic for now)
-            val bandIndex = (i % bands.size)
-            val gain = bands[bandIndex].gain
-
-            sample *= (1f + gain / 10f)
-
-            output[i] = sample.coerceIn(-1f, 1f)
+    /**
+     * Processes raw FFT data into frequency magnitudes.
+     * Fixes the "Unresolved reference: process" error.
+     */
+    fun process(fft: ByteArray): FloatArray {
+        val n = fft.size
+        val magnitudes = FloatArray(n / 2)
+        for (i in 0 until n / 2) {
+            val real = fft[i * 2].toFloat()
+            val imag = fft[i * 2 + 1].toFloat()
+            // Calculate magnitude: sqrt(re^2 + im^2)
+            magnitudes[i] = hypot(real, imag)
         }
-
-        return Pair(output, bands)
+        return magnitudes
     }
 }
