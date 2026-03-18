@@ -36,7 +36,6 @@ fun PlayerScreen(
     val currentSong by viewModel.currentSong.collectAsState()
     
     val rackBg = Color(0xFF0D0F12)
-    val panelBg = Color(0xFF1A1D23)
     val accentGreen = Color(0xFF00FF88)
     val accentAmber = Color(0xFFFFB000)
     val accentRed = Color(0xFFFF0033)
@@ -53,28 +52,65 @@ fun PlayerScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // Display Panel
-            DisplayPanel(
-                songTitle = currentSong?.title ?: "NO SIGNAL",
-                artist = currentSong?.artist ?: "---",
-                accentColor = accentGreen
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF1A1D23))
+                    .border(1.dp, Color(0xFF2A2F36))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "NOW PLAYING",
+                    color = Color(0xFF6B7280),
+                    fontSize = 10.sp,
+                    letterSpacing = 1.5.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .background(Color(0xFF000000), RoundedCornerShape(4.dp))
+                        .border(2.dp, Color(0xFF2A2F36), RoundedCornerShape(4.dp))
+                        .padding(12.dp),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = currentSong?.title ?: "NO SIGNAL",
+                            color = accentGreen,
+                            fontSize = 18.sp,
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        
+                        Text(
+                            text = currentSong?.artist ?: "---",
+                            color = accentGreen.copy(alpha = 0.7f),
+                            fontSize = 14.sp,
+                            fontFamily = FontFamily.Monospace,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
             
             // Tape Reels
-            TapeReelsPanel(
-                isPlaying = isPlaying,
-                accentColor = accentGreen
-            )
+            TapeReelsPanel(isPlaying = isPlaying, accentColor = accentGreen)
             
             // Timeline
-            TimelinePanel(
-                accentColor = accentAmber
-            )
+            TimelinePanel(accentColor = accentAmber)
             
             // Transport Controls
             TransportControlsPanel(
                 isPlaying = isPlaying,
-                onPlayPause = { viewModel.play() },
-                onStop = { /* Add stop method to ViewModel */ },
+                onPlayPause = { /* viewModel method here */ },
                 onOpenLibrary = onNavigateToLibrary,
                 accentColor = accentGreen,
                 stopColor = accentRed
@@ -84,69 +120,7 @@ fun PlayerScreen(
 }
 
 @Composable
-fun DisplayPanel(
-    songTitle: String,
-    artist: String,
-    accentColor: Color
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF1A1D23))
-            .border(1.dp, Color(0xFF2A2F36))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            text = "NOW PLAYING",
-            color = Color(0xFF6B7280),
-            fontSize = 10.sp,
-            letterSpacing = 1.5.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold
-        )
-        
-        // Main display
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp)
-                .background(Color(0xFF000000), RoundedCornerShape(4.dp))
-                .border(2.dp, Color(0xFF2A2F36), RoundedCornerShape(4.dp))
-                .padding(12.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = songTitle,
-                    color = accentColor,
-                    fontSize = 18.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                
-                Text(
-                    text = artist,
-                    color = accentColor.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Monospace,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TapeReelsPanel(
-    isPlaying: Boolean,
-    accentColor: Color
-) {
+fun TapeReelsPanel(isPlaying: Boolean, accentColor: Color) {
     val infiniteTransition = rememberInfiniteTransition(label = "reel")
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -180,14 +154,8 @@ fun TapeReelsPanel(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left Reel
-            TapeReel(
-                rotation = if (isPlaying) rotation else 0f,
-                accentColor = accentColor,
-                label = "L"
-            )
+            TapeReel(rotation = if (isPlaying) rotation else 0f, accentColor = accentColor, label = "L")
             
-            // Tape head
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -202,10 +170,7 @@ fun TapeReelsPanel(
                     Box(
                         modifier = Modifier
                             .size(20.dp)
-                            .background(
-                                if (isPlaying) accentColor else Color(0xFF2A2F36),
-                                CircleShape
-                            )
+                            .background(if (isPlaying) accentColor else Color(0xFF2A2F36), CircleShape)
                     )
                 }
                 
@@ -217,22 +182,13 @@ fun TapeReelsPanel(
                 )
             }
             
-            // Right Reel
-            TapeReel(
-                rotation = if (isPlaying) -rotation else 0f,
-                accentColor = accentColor,
-                label = "R"
-            )
+            TapeReel(rotation = if (isPlaying) -rotation else 0f, accentColor = accentColor, label = "R")
         }
     }
 }
 
 @Composable
-fun TapeReel(
-    rotation: Float,
-    accentColor: Color,
-    label: String
-) {
+fun TapeReel(rotation: Float, accentColor: Color, label: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -245,22 +201,12 @@ fun TapeReel(
                 .border(3.dp, Color(0xFF2A2F36), CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .rotate(rotation)
-            ) {
+            Canvas(modifier = Modifier.fillMaxSize().rotate(rotation)) {
                 val center = Offset(size.width / 2, size.height / 2)
                 val radius = size.minDimension / 2 - 20.dp.toPx()
                 
-                // Center hub
-                drawCircle(
-                    color = Color(0xFF2A2F36),
-                    radius = radius * 0.3f,
-                    center = center
-                )
+                drawCircle(color = Color(0xFF2A2F36), radius = radius * 0.3f, center = center)
                 
-                // Spokes
                 for (i in 0 until 6) {
                     val angle = (i * 60f) * (Math.PI / 180f)
                     val x1 = center.x + (radius * 0.3f * cos(angle)).toFloat()
@@ -276,7 +222,6 @@ fun TapeReel(
                     )
                 }
                 
-                // Outer ring
                 drawCircle(
                     color = accentColor.copy(alpha = 0.2f),
                     radius = radius,
@@ -314,29 +259,13 @@ fun TimelinePanel(accentColor: Color) {
             TimeDisplay(time = 0L, label = "REMAINING", accentColor = accentColor)
         }
         
-        // Progress bar
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(8.dp)
                 .background(Color(0xFF0D0F12), RoundedCornerShape(4.dp))
                 .border(1.dp, Color(0xFF2A2F36), RoundedCornerShape(4.dp))
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(0.0f)
-                    .background(
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                accentColor.copy(alpha = 0.8f),
-                                accentColor
-                            )
-                        ),
-                        RoundedCornerShape(4.dp)
-                    )
-            )
-        }
+        )
     }
 }
 
@@ -364,7 +293,7 @@ fun TimeDisplay(time: Long, label: String, accentColor: Color) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = formatTime(time),
+                text = "00:00",
                 color = accentColor,
                 fontSize = 16.sp,
                 fontFamily = FontFamily.Monospace,
@@ -374,18 +303,10 @@ fun TimeDisplay(time: Long, label: String, accentColor: Color) {
     }
 }
 
-private fun formatTime(millis: Long): String {
-    val totalSeconds = millis / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return String.format("%02d:%02d", minutes, seconds)
-}
-
 @Composable
 fun TransportControlsPanel(
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
-    onStop: () -> Unit,
     onOpenLibrary: () -> Unit,
     accentColor: Color,
     stopColor: Color
@@ -412,27 +333,9 @@ fun TransportControlsPanel(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Stop
-            TransportButton(
-                label = "■",
-                onClick = onStop,
-                color = stopColor
-            )
-            
-            // Play/Pause
-            TransportButton(
-                label = if (isPlaying) "❚❚" else "►",
-                onClick = onPlayPause,
-                color = accentColor,
-                isActive = isPlaying
-            )
-            
-            // Library
-            TransportButton(
-                label = "≡",
-                onClick = onOpenLibrary,
-                color = Color(0xFFFFB000)
-            )
+            TransportButton(label = "■", onClick = {}, color = stopColor)
+            TransportButton(label = if (isPlaying) "❚❚" else "►", onClick = onPlayPause, color = accentColor, isActive = isPlaying)
+            TransportButton(label = "≡", onClick = onOpenLibrary, color = Color(0xFFFFB000))
         }
     }
 }
@@ -454,18 +357,11 @@ fun TransportButton(
             )
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF3A3F47),
-                        Color(0xFF2A2F36)
-                    )
+                    colors = listOf(Color(0xFF3A3F47), Color(0xFF2A2F36))
                 ),
                 RoundedCornerShape(4.dp)
             )
-            .border(
-                2.dp,
-                if (isActive) color else Color(0xFF4A5057),
-                RoundedCornerShape(4.dp)
-            )
+            .border(2.dp, if (isActive) color else Color(0xFF4A5057), RoundedCornerShape(4.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
