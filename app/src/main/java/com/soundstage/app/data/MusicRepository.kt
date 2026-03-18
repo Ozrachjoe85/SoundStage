@@ -1,49 +1,51 @@
 package com.soundstage.app.data
 
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.provider.MediaStore
-import com.soundstage.app.data.models.Track
+import android.net.Uri
 
-class MusicRepository(private val resolver: ContentResolver) {
+data class Song(
+    val id: Long,
+    val title: String,
+    val artist: String,
+    val uri: Uri,
+    val duration: Long
+)
 
-    fun getAllTracks(): List<Track> {
-        val tracks = mutableListOf<Track>()
+class MusicRepository(private val contentResolver: ContentResolver) {
 
+    fun fetchSongs(): List<Song> {
+        val songs = mutableListOf<Song>()
+        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val projection = arrayOf(
             MediaStore.Audio.Media._ID,
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
-            MediaStore.Audio.Media.ALBUM,
-            MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.DURATION
         )
 
-        val cursor = resolver.query(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-            projection, null, null, null
+        val cursor = contentResolver.query(
+            uri, projection, "${MediaStore.Audio.Media.IS_MUSIC} != 0", null, null
         )
 
         cursor?.use {
             val idCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
             val titleCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-            val albumCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
-            val dataCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
-            val durationCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
+            val durCol = it.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
 
             while (it.moveToNext()) {
-                tracks.add(
-                    Track(
-                        id = it.getLong(idCol),
-                        title = it.getString(titleCol) ?: "Unknown Title",
-                        artist = it.getString(artistCol) ?: "Unknown Artist",
-                        album = it.getString(albumCol) ?: "Unknown Album",
-                        path = it.getString(dataCol) ?: "",
-                        duration = it.getLong(durationCol)
-                    )
-                )
+                val id = it.getLong(idCol)
+                songs.add(Song(
+                    id = id,
+                    title = it.getString(titleCol),
+                    artist = it.getString(artistCol),
+                    duration = it.getLong(durCol),
+                    uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
+                ))
             }
         }
-        return tracks
+        return songs
     }
 }
