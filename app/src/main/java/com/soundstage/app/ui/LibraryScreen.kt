@@ -18,16 +18,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.soundstage.app.data.models.Track
+import com.soundstage.app.data.models.Song
 import com.soundstage.app.viewmodel.LibraryViewModel
 
 @Composable
 fun LibraryScreen(
     viewModel: LibraryViewModel = viewModel(),
-    onTrackSelected: (Track) -> Unit
+    onTrackSelected: (Song) -> Unit
 ) {
     val songs by viewModel.songs.collectAsState()
-    val isScanning by viewModel.isScanning.collectAsState()
     
     val rackBg = Color(0xFF0D0F12)
     val panelBg = Color(0xFF1A1D23)
@@ -48,8 +47,6 @@ fun LibraryScreen(
             // Header
             LibraryHeader(
                 totalTracks = songs.size,
-                isScanning = isScanning,
-                onScan = { viewModel.scanLibrary() },
                 accentColor = accentGreen
             )
             
@@ -66,8 +63,6 @@ fun LibraryScreen(
 @Composable
 fun LibraryHeader(
     totalTracks: Int,
-    isScanning: Boolean,
-    onScan: () -> Unit,
     accentColor: Color
 ) {
     Column(
@@ -125,41 +120,14 @@ fun LibraryHeader(
                     }
                 }
             }
-            
-            // Scan button
-            Box(
-                modifier = Modifier
-                    .size(width = 100.dp, height = 40.dp)
-                    .background(
-                        if (isScanning) accentColor.copy(alpha = 0.2f)
-                        else Color(0xFF2A2F36),
-                        RoundedCornerShape(4.dp)
-                    )
-                    .border(
-                        2.dp,
-                        if (isScanning) accentColor else Color(0xFF4A5057),
-                        RoundedCornerShape(4.dp)
-                    )
-                    .clickable(enabled = !isScanning, onClick = onScan),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = if (isScanning) "SCAN..." else "SCAN",
-                    color = if (isScanning) accentColor else Color(0xFF9AA4AD),
-                    fontSize = 12.sp,
-                    letterSpacing = 1.sp,
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold
-                )
-            }
         }
     }
 }
 
 @Composable
 fun TrackListPanel(
-    tracks: List<Track>,
-    onTrackSelected: (Track) -> Unit,
+    tracks: List<Song>,
+    onTrackSelected: (Song) -> Unit,
     accentColor: Color
 ) {
     Column(
@@ -203,7 +171,7 @@ fun TrackListPanel(
                     )
                     
                     Text(
-                        text = "Press SCAN to index library",
+                        text = "No music files found",
                         color = Color(0xFF4A5057),
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace
@@ -233,7 +201,7 @@ fun TrackListPanel(
 
 @Composable
 fun TrackItem(
-    track: Track,
+    track: Song,
     onSelect: () -> Unit,
     accentColor: Color
 ) {
@@ -314,7 +282,7 @@ fun TrackItem(
                 )
                 
                 Text(
-                    text = formatDuration(track.duration),
+                    text = formatDuration(track.duration.toInt()),
                     color = Color(0xFF6B7280),
                     fontSize = 11.sp,
                     fontFamily = FontFamily.Monospace
