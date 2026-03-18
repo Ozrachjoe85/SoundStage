@@ -13,10 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.soundstage.app.ui.components.AnalogDial
 import com.soundstage.app.viewmodel.PlayerViewModel
 
 @Composable
-fun PlayerScreen(viewModel: PlayerViewModel) {
+fun PlayerScreen(
+    viewModel: PlayerViewModel,
+    onOpenLibrary: () -> Unit // Added missing parameter
+) {
     val currentSong by viewModel.currentSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
 
@@ -28,7 +32,8 @@ fun PlayerScreen(viewModel: PlayerViewModel) {
         Box(
             modifier = Modifier.fillMaxWidth().height(220.dp).background(Color(0xFF050505))
         ) {
-            SegmentedVisualizer(isPlaying)
+            SegmentedVisualizer(viewModel) // Pass ViewModel, not Boolean
+            
             // CRT Scanline Overlay
             Canvas(modifier = Modifier.fillMaxSize()) {
                 for (i in 0 until size.height.toInt() step 8) {
@@ -39,7 +44,6 @@ fun PlayerScreen(viewModel: PlayerViewModel) {
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // Segmented Track Readout
         Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
             Text(currentSong?.title?.uppercase() ?: "NO_DATA", color = Color(0xFF00FF88), fontSize = 24.sp, fontFamily = FontFamily.Monospace)
             Text(currentSong?.artist?.uppercase() ?: "IDLE", color = Color(0xFF004422), fontSize = 14.sp, fontFamily = FontFamily.Monospace)
@@ -47,9 +51,8 @@ fun PlayerScreen(viewModel: PlayerViewModel) {
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // The Transport Logic
         Row(verticalAlignment = Alignment.CenterVertically) {
-            AnalogDial("GAIN")
+            AnalogDial("GAIN") { /* Update gain logic */ }
             Spacer(modifier = Modifier.width(40.dp))
             IconButton(
                 onClick = { viewModel.togglePlayback() },
@@ -58,7 +61,7 @@ fun PlayerScreen(viewModel: PlayerViewModel) {
                 Text(if (isPlaying) "||" else ">>", color = Color(0xFF00FF88), fontSize = 20.sp)
             }
             Spacer(modifier = Modifier.width(40.dp))
-            AnalogDial("VOL")
+            AnalogDial("VOL") { /* Update volume logic */ }
         }
         
         Spacer(modifier = Modifier.height(40.dp))
@@ -74,26 +77,12 @@ fun SegmentedVisualizer(viewModel: PlayerViewModel) {
         val spacing = size.width / bars
         
         magnitudes.forEachIndexed { i, magnitude ->
-            // Scale the magnitude to fit the screen height
             val scaledHeight = (magnitude * 2f).coerceIn(10f, size.height)
-            
             drawRect(
-                color = if (scaledHeight > size.height * 0.8f) Color(0xFFFF3131) else Color(0xFF00FF88),
+                color = if (scaledHeight > size.height * 0.7f) Color(0xFFFF3131) else Color(0xFF00FF88),
                 topLeft = Offset(i * spacing, size.height - scaledHeight),
                 size = androidx.compose.ui.geometry.Size(spacing - 4f, scaledHeight)
             )
         }
-    }
-}
-
-@Composable
-fun AnalogDial(label: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.size(50.dp).background(Color(0xFF151516), CircleShape)) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                drawLine(Color(0xFF00FF88), center, Offset(size.width/2, 5f), 4f)
-            }
-        }
-        Text(label, color = Color(0xFF004422), fontSize = 10.sp, fontFamily = FontFamily.Monospace)
     }
 }
