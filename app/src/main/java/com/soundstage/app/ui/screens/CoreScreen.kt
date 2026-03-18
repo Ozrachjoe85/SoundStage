@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -16,15 +15,19 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.*
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.soundstage.app.ui.viewmodel.CoreViewModel
 import kotlin.math.*
 
 @Composable
-fun CoreScreen(viewModel: com.soundstage.app.ui.viewmodel.CoreViewModel) {
+fun CoreScreen(
+    viewModel: CoreViewModel = viewModel()
+) {
+
+    val state by viewModel.state.collectAsState()
 
     val bg = Color(0xFF0A0C0F)
-    val panel = Color(0xFF12161B)
     val accent = Color(0xFF6CFFB0)
-    val accentDim = Color(0xFF2A5A47)
     val amber = Color(0xFFFFB347)
 
     Column(
@@ -42,25 +45,51 @@ fun CoreScreen(viewModel: com.soundstage.app.ui.viewmodel.CoreViewModel) {
             fontFamily = FontFamily.Monospace
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
 
-            RetroKnob(label = "BASS", accent)
-            RetroKnob(label = "MID", accent)
-            RetroKnob(label = "TREBLE", accent)
-            RetroKnob(label = "WIDTH", amber)
+            RetroKnob(
+                label = "BASS",
+                value = state.bass,
+                onChange = viewModel::setBass,
+                color = accent
+            )
+
+            RetroKnob(
+                label = "MID",
+                value = state.mid,
+                onChange = viewModel::setMid,
+                color = accent
+            )
+
+            RetroKnob(
+                label = "TREBLE",
+                value = state.treble,
+                onChange = viewModel::setTreble,
+                color = accent
+            )
+
+            RetroKnob(
+                label = "WIDTH",
+                value = state.width,
+                onChange = viewModel::setWidth,
+                color = amber
+            )
         }
     }
 }
 
 @Composable
-fun RetroKnob(label: String, color: Color) {
-
-    var value by remember { mutableStateOf(0.5f) }
+fun RetroKnob(
+    label: String,
+    value: Float,
+    onChange: (Float) -> Unit,
+    color: Color
+) {
 
     val animatedValue by animateFloatAsState(targetValue = value)
 
@@ -75,14 +104,15 @@ fun RetroKnob(label: String, color: Color) {
                 .background(Color(0xFF151A20), CircleShape)
                 .border(1.dp, Color(0xFF2A2F36), CircleShape)
                 .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        value = (value - dragAmount.y / 300f).coerceIn(0f, 1f)
+                    detectDragGestures { _, dragAmount ->
+                        val newValue = (value - dragAmount.y / 300f).coerceIn(0f, 1f)
+                        onChange(newValue)
                     }
                 },
             contentAlignment = Alignment.Center
         ) {
 
-            // Glow ring
+            // glow layer
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -94,7 +124,7 @@ fun RetroKnob(label: String, color: Color) {
                     )
             )
 
-            // Indicator
+            // indicator
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val angle = animatedValue * 270f - 135f
                 val radius = size.minDimension / 2.5f
