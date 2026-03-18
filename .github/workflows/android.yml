@@ -1,76 +1,25 @@
-name: SoundStage Production CI
-
-on:
-  push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
-
-jobs:
-  build:
-    name: Build and Analyze
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: gradle
-
-      - name: Install Image Processing Tools
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
-
-      # --- AUTOMATED ICON GENERATION ---
-      - name: Generate Adaptive Mipmaps
+# --- AUTOMATED ICON GENERATION (NO EXTERNAL FILES NEEDED) ---
+      - name: Create and Generate Mipmaps
         run: |
-          BG_SRC="app/src/main/res/drawable/ic_launcher_background.png"
-          FG_SRC="app/src/main/res/drawable/ic_launcher_foreground.png"
-          
-          # Check if source images exist before proceeding
-          if [ ! -f "$BG_SRC" ] || [ ! -f "$FG_SRC" ]; then
-            echo "Error: Source images not found in app/src/main/res/drawable/"
-            exit 1
-          fi
+          # 1. Create a 512x512 Charcoal Background
+          convert -size 512x512 canvas:'#121212' \
+                  -draw "fill '#1A1A1A' circle 256,256 256,50" \
+                  ic_launcher_background.png
 
+          # 2. Create a 512x512 Phosphor Knob Foreground
+          convert -size 512x512 canvas:transparent \
+                  -fill '#00FF88' -draw "circle 256,256 256,100" \
+                  -blur 0x8 -fill '#121212' -draw "circle 256,256 256,120" \
+                  -stroke '#00FF88' -strokewidth 4 -fill none -draw "arc 100,100 412,412 0,360" \
+                  ic_launcher_foreground.png
+
+          # 3. Scale into Android folders
           declare -A densities=( ["mdpi"]="48" ["hdpi"]="72" ["xhdpi"]="96" ["xxhdpi"]="144" ["xxxhdpi"]="192" )
           for density in "${!densities[@]}"; do
             SIZE="${densities[$density]}"
             TARGET_DIR="app/src/main/res/mipmap-${density}"
             mkdir -p "$TARGET_DIR"
-            
-            # Resize layers
-            convert "$BG_SRC" -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_background.png"
-            convert "$FG_SRC" -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_foreground.png"
-            
-            # Create legacy combined icon for old Android versions
+            convert ic_launcher_background.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_background.png"
+            convert ic_launcher_foreground.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_foreground.png"
             convert "$TARGET_DIR/ic_launcher_background.png" "$TARGET_DIR/ic_launcher_foreground.png" -gravity center -composite "$TARGET_DIR/ic_launcher.png"
           done
-
-      - name: Grant Execute Permission
-        run: chmod +x gradlew
-
-      - name: Run Static Analysis (Lint)
-        run: ./gradlew lintDebug
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Upload Analysis Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lint-report
-          path: app/build/reports/lint-results-debug.html
-
-      - name: Store Production-Ready APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: soundstage-debug-build
-          path: app/build/outputs/apk/debug/app-debug.apk
