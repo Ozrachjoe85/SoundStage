@@ -1,3 +1,4 @@
+import android.media.audiofx.Visualizer
 fun startWaveform(onData: (FloatArray) -> Unit) {
     visualizer.setDataCaptureListener(
         object : Visualizer.OnDataCaptureListener {
