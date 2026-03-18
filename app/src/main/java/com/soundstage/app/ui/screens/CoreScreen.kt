@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.*
 import kotlin.math.*
 
 @Composable
-fun CoreScreen() {
+fun CoreScreen(viewModel: com.soundstage.app.ui.viewmodel.CoreViewModel) {
 
     val bg = Color(0xFF0A0C0F)
     val panel = Color(0xFF12161B)
