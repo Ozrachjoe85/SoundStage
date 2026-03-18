@@ -1,75 +1,35 @@
-name: SoundStage Production CI
+name: Android CI Build
 
 on:
   push:
-    branches: [ "main", "master" ]
-  pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
-    name: Build and Analyze
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout Repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
-          cache: gradle
+          java-version: '17'
 
-      - name: Install Image Processing Tools
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
-
-      - name: Create and Generate Mipmaps
-        run: |
-          # 1. Create the base canvas images
-          convert -size 512x512 canvas:'#121212' -draw "fill '#1A1A1A' circle 256,256 256,50" bg.png
-          convert -size 512x512 canvas:transparent -fill '#00FF88' -draw "circle 256,256 256,100" -blur 0x8 -fill '#121212' -draw "circle 256,256 256,120" -stroke '#00FF88' -strokewidth 4 -fill none -draw "arc 100,100 412,412 0,360" fg.png
-
-          # 2. Map Android densities
-          declare -A densities=( ["mdpi"]="48" ["hdpi"]="72" ["xhdpi"]="96" ["xxhdpi"]="144" ["xxxhdpi"]="192" )
-          
-          for density in "${!densities[@]}"; do
-            SIZE="${densities[$density]}"
-            TARGET_DIR="app/src/main/res/mipmap-${density}"
-            mkdir -p "$TARGET_DIR"
-            
-            # Resize and place
-            convert bg.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_background.png"
-            convert fg.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_foreground.png"
-            
-            # Create the legacy flat icon (API < 26)
-            convert "$TARGET_DIR/ic_launcher_background.png" "$TARGET_DIR/ic_launcher_foreground.png" -gravity center -composite "$TARGET_DIR/ic_launcher.png"
-          done
-
-      - name: Debug Resource Check
-        run: ls -R app/src/main/res/mipmap-*
-
-      - name: Grant Execute Permission
+      - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Run Static Analysis (Lint)
-        run: ./gradlew lintDebug
+      - name: Cache Gradle
+        uses: gradle/gradle-build-action@v3
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload Analysis Report
-        if: always()
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: lint-report
-          path: app/build/reports/lint-results-debug.html
-
-      - name: Store Production-Ready APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: soundstage-debug-build
+          name: SoundStage-Debug-APK
           path: app/build/outputs/apk/debug/app-debug.apk
