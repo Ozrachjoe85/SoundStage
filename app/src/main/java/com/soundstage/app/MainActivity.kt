@@ -10,50 +10,39 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.soundstage.app.ui.PlayerScreen
+import androidx.compose.ui.graphics.Color
+import com.soundstage.app.navigation.NavGraph
 import com.soundstage.app.ui.theme.SoundStageTheme
 
 class MainActivity : ComponentActivity() {
 
-    // Helper to request all necessary permissions for an Audio App
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val granted = permissions.entries.all { it.value }
-        if (granted) {
-            // Permissions granted: The MusicRepository will now be able to scan files
-        }
-    }
+    ) { _ -> /* Permissions handled */ }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Define which permissions we need based on Android Version
-        val permissionsToRequest = mutableListOf<String>()
-        
-        // Notification permission for the Playback Service (Android 13+)
+        val permissions = mutableListOf<String>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
-            permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
+            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
         } else {
-            // Legacy storage permission for older Androids
-            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         setContent {
             SoundStageTheme {
-                // Launch permission request once the UI starts
                 LaunchedEffect(Unit) {
-                    permissionLauncher.launch(permissionsToRequest.toTypedArray())
+                    permissionLauncher.launch(permissions.toTypedArray())
                 }
 
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = androidx.compose.ui.graphics.Color(0xFF121212) // Charcoal Base
+                    color = Color(0xFF121212)
                 ) {
-                    // This initializes the ViewModel and the Player UI
-                    PlayerScreen(viewModel = viewModel())
+                    // This is the fix: Call the NavGraph, not the Screen directly
+                    NavGraph()
                 }
             }
         }
