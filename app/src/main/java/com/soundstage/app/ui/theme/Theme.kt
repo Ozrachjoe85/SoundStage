@@ -5,6 +5,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Typography
 
 // Semantic Token Mapping for High-Grade Optimal Performance
 private val DarkColorPalette = darkColorScheme(
