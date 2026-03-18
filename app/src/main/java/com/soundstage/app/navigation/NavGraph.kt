@@ -1,5 +1,7 @@
 package com.soundstage.app.navigation
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.soundstage.app.viewmodel.PlayerViewModel
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
