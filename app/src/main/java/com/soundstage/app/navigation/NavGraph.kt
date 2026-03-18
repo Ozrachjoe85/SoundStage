@@ -13,6 +13,7 @@ import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
 import com.soundstage.app.ui.theme.TacticalThemeManager
 import com.soundstage.app.viewmodel.*
+import com.soundstage.app.data.models.Song
 
 @Composable
 fun NavGraph() {
@@ -42,7 +43,7 @@ fun NavGraph() {
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { PlayerScreen(playerVm) { navController.navigate("library") } }
             composable("library") { 
-                LibraryScreen(viewModel()) { song -> 
+                LibraryScreen(viewModel()) { song: Song -> 
                     playerVm.loadAndPlay(song)
                     navController.navigate("player")
                 } 
