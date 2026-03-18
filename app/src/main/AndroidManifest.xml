@@ -1,30 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.soundstage.app">
 
     <application
-    android:label="SoundStage"
-    android:theme="@style/Theme.SoundStage">
+        android:label="SoundStage"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.SoundStage">
 
-    <activity
-        android:name="com.soundstage.app.MainActivity" 
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
-
-</application>
-        
+        <activity
+            android:name=".MainActivity" 
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
-    <application
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round"
-    ... >
-
 </manifest>
