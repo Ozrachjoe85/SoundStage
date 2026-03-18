@@ -7,7 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.soundstage.app.ui.PlayerScreen
 import com.soundstage.app.ui.LibraryScreen
-import com.soundstage.app.ui.AudioViewModel
+import com.soundstage.app.viewmodel.PlayerViewModel
 import com.soundstage.app.viewmodel.LibraryViewModel
 
 @Composable
@@ -16,13 +16,16 @@ fun NavGraph() {
 
     NavHost(navController = navController, startDestination = "player") {
         composable("player") {
-            val audioVm: AudioViewModel = viewModel()
-            PlayerScreen(viewModel = audioVm)
+            // Standardizing on PlayerViewModel to fix the mismatch
+            val playerVm: PlayerViewModel = viewModel()
+            PlayerScreen(viewModel = playerVm)
         }
+        
         composable("library") {
             val libraryVm: LibraryViewModel = viewModel()
             LibraryScreen(viewModel = libraryVm) { songId ->
-                // Handle song selection logic here
+                // Navigation logic for song selection
+                navController.navigate("player")
             }
         }
     }
