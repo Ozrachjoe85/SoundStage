@@ -38,7 +38,12 @@ fun NavGraph() {
     ) { padding ->
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { 
-                PlayerScreen(playerVm) { navController.navigate("library") } 
+                // FIXED: Explicitly passing both required navigation lambdas
+                PlayerScreen(
+                    viewModel = playerVm, 
+                    onOpenLibrary = { navController.navigate("library") },
+                    onOpenQueue = { navController.navigate("queue") }
+                ) 
             }
             composable("library") { 
                 LibraryScreen(libraryVm) { song ->
@@ -48,6 +53,13 @@ fun NavGraph() {
             }
             composable("eq") { EQScreen(eqVm) }
             composable("settings") { SettingsScreen() }
+            
+            // Adding the placeholder for Queue so the navigation doesn't crash
+            composable("queue") { 
+                Box(Modifier.fillMaxSize().background(theme.background)) {
+                    Text("QUEUE_MODULE_ACTIVE", color = theme.primary, modifier = Modifier.padding(20.dp))
+                }
+            }
         }
     }
 }
@@ -55,7 +67,16 @@ fun NavGraph() {
 @Composable
 fun NavTab(label: String, route: String, navController: androidx.navigation.NavController) {
     val theme = SoundStageThemeManager.currentTheme
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val active = currentRoute == route
+
     TextButton(onClick = { navController.navigate(route) }) {
-        Text("[$label]", color = theme.primary, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
+        Text(
+            text = if (active) "[$label]" else label, 
+            color = if (active) theme.primary else theme.accent, 
+            fontFamily = FontFamily.Monospace, 
+            fontSize = 11.sp
+        )
     }
 }
