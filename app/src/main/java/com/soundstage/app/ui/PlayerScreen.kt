@@ -66,16 +66,21 @@ fun PlayerScreen(viewModel: PlayerViewModel) {
 }
 
 @Composable
-fun SegmentedVisualizer(isPlaying: Boolean) {
+fun SegmentedVisualizer(viewModel: PlayerViewModel) {
+    val magnitudes by viewModel.visualizerData.collectAsState()
+
     Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         val bars = 24
         val spacing = size.width / bars
-        for (i in 0 until bars) {
-            val h = if (isPlaying) (20..size.height.toInt()).random().toFloat() else 10f
+        
+        magnitudes.forEachIndexed { i, magnitude ->
+            // Scale the magnitude to fit the screen height
+            val scaledHeight = (magnitude * 2f).coerceIn(10f, size.height)
+            
             drawRect(
-                color = if (h > size.height * 0.7f) Color(0xFFFF3131) else Color(0xFF00FF88),
-                topLeft = Offset(i * spacing, size.height - h),
-                size = androidx.compose.ui.geometry.Size(spacing - 4f, h)
+                color = if (scaledHeight > size.height * 0.8f) Color(0xFFFF3131) else Color(0xFF00FF88),
+                topLeft = Offset(i * spacing, size.height - scaledHeight),
+                size = androidx.compose.ui.geometry.Size(spacing - 4f, scaledHeight)
             )
         }
     }
