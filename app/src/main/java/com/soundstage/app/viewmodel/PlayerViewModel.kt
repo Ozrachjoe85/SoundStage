@@ -1,47 +1,35 @@
 package com.soundstage.app.viewmodel
 
-import androidx.lifecycle.ViewModel
-import com.soundstage.app.audio.AudioEngine
-import com.soundstage.app.audio.EQBand
-import com.soundstage.app.data.models.Track
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.media3.exoplayer.ExoPlayer
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
-class PlayerViewModel(private val audioEngine: AudioEngine) : ViewModel() {
+class PlayerViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _currentTrack = MutableStateFlow<Track?>(null)
-    val currentTrack = _currentTrack.asStateFlow()
+    // Initialize the Media3 Player
+    val player: ExoPlayer = ExoPlayer.Builder(application).build()
 
     private val _isPlaying = MutableStateFlow(false)
-    val isPlaying = _isPlaying.asStateFlow()
-
-    private val _eqBands = MutableStateFlow<List<EQBand>>(emptyList())
-    val eqBands = _eqBands.asStateFlow()
-
-    init {
-        audioEngine.onEqUpdate = { bands ->
-            _eqBands.value = bands
-        }
-    }
-
-    fun playTrack(track: Track) {
-        _currentTrack.value = track
-        audioEngine.play(track.path)
-        _isPlaying.value = true
-    }
+    val isPlaying: StateFlow<Boolean> = _isPlaying
 
     fun togglePlayback() {
-        if (_isPlaying.value) {
-            audioEngine.pause()
+        if (player.isPlaying) {
+            player.pause()
+            _isPlaying.value = false
         } else {
-            _currentTrack.value?.let { audioEngine.play(it.path) }
+            player.play()
+            _isPlaying.value = true
         }
-        _isPlaying.value = !_isPlaying.value
+    }
+
+    fun onEqUpdate(band: Int, value: Float) {
+        // Future implementation for AudioProcessor EQ logic
     }
 
     override fun onCleared() {
         super.onCleared()
-        audioEngine.release()
+        player.release()
     }
 }
-
