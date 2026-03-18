@@ -1,32 +1,34 @@
 package com.soundstage.app.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.*
+import androidx.navigation.compose.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.soundstage.app.ui.PlayerScreen
-import com.soundstage.app.ui.LibraryScreen
-import com.soundstage.app.viewmodel.PlayerViewModel
-import com.soundstage.app.viewmodel.LibraryViewModel
+import com.soundstage.app.ui.*
+import com.soundstage.app.viewmodel.*
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    // By creating the PlayerViewModel here, it persists across screen swaps
+    val playerVm: PlayerViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "player") {
         composable("player") {
-            // Standardizing on PlayerViewModel to fix the mismatch
-            val playerVm: PlayerViewModel = viewModel()
-            PlayerScreen(viewModel = playerVm)
+            PlayerScreen(
+                viewModel = playerVm,
+                onOpenLibrary = { navController.navigate("library") }
+            )
         }
         
         composable("library") {
             val libraryVm: LibraryViewModel = viewModel()
-            LibraryScreen(viewModel = libraryVm) { songId ->
-                // Navigation logic for song selection
-                navController.navigate("player")
-            }
+            LibraryScreen(
+                viewModel = libraryVm,
+                onSongClick = { song ->
+                    playerVm.loadAndPlay(song)
+                    navController.navigate("player")
+                }
+            )
         }
     }
 }
