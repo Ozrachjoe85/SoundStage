@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
+import com.soundstage.app.ui.theme.SoundStageThemeManager
 import com.soundstage.app.viewmodel.*
 
 @Composable
@@ -17,28 +20,25 @@ fun NavGraph() {
     val playerVm: PlayerViewModel = viewModel()
     val libraryVm: LibraryViewModel = viewModel()
     val eqVm: EQViewModel = viewModel()
+    
+    val theme = SoundStageThemeManager.currentTheme
 
     Scaffold(
         bottomBar = {
             Row(
-                modifier = Modifier.fillMaxWidth().background(Color(0xFF0A0A0B)),
+                modifier = Modifier.fillMaxWidth().background(theme.background).padding(8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                TextButton(onClick = { navController.navigate("player") }) {
-                    Text("[DECK]", color = Color(0xFF00FF88))
-                }
-                TextButton(onClick = { navController.navigate("library") }) {
-                    Text("[DATA]", color = Color(0xFF00FF88))
-                }
-                TextButton(onClick = { navController.navigate("eq") }) {
-                    Text("[CORE]", color = Color(0xFF00FF88))
-                }
+                NavTab("DECK", "player", navController)
+                NavTab("DATA", "library", navController)
+                NavTab("CORE", "eq", navController)
+                NavTab("CONF", "settings", navController)
             }
         }
     ) { padding ->
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { 
-                PlayerScreen(viewModel = playerVm, onOpenLibrary = { navController.navigate("library") }) 
+                PlayerScreen(playerVm) { navController.navigate("library") } 
             }
             composable("library") { 
                 LibraryScreen(libraryVm) { song ->
@@ -47,6 +47,15 @@ fun NavGraph() {
                 } 
             }
             composable("eq") { EQScreen(eqVm) }
+            composable("settings") { SettingsScreen() }
         }
+    }
+}
+
+@Composable
+fun NavTab(label: String, route: String, navController: androidx.navigation.NavController) {
+    val theme = SoundStageThemeManager.currentTheme
+    TextButton(onClick = { navController.navigate(route) }) {
+        Text("[$label]", color = theme.primary, fontFamily = FontFamily.Monospace, fontSize = 11.sp)
     }
 }
