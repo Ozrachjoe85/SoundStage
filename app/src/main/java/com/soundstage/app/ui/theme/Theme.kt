@@ -42,8 +42,9 @@ fun SoundStageTheme(
     }
 
     MaterialTheme(
-        colorScheme = colors,
-        typography = Typography, // Uses Material3 Typography referenced earlier
-        content = content
-    )
+    colorScheme = colors,
+    // Explicitly use the Material3 Typography instead of the generic one
+    typography = androidx.compose.material3.Typography(), 
+    content = content
+)
 }
