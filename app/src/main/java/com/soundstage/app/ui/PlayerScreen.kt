@@ -1,15 +1,13 @@
 package com.soundstage.app.ui
 
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.navigation.NavController
+import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
 
-@Composable
-fun PlayerScreen(navController: NavController) {
+@Composable // <--- Make sure this is here!
+fun PlayerScreen(viewModel: PlayerViewModel) {
     Column {
-        Text("Now Playing")
-        Button(onClick = { navController.navigate("eq") }) {
-            Text("Open EQ")
-        }
+        Text(text = "Now Playing")
+        // ... rest of your code
     }
 }
