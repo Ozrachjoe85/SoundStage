@@ -2,8 +2,10 @@ package com.soundstage.app.viewmodel
 
 import android.app.Application
 import android.media.audiofx.Visualizer
+import androidx.annotation.OptIn
 import androidx.lifecycle.AndroidViewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import com.soundstage.app.audio.AudioProcessor
 import com.soundstage.app.data.Song
@@ -14,7 +16,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
     val player: ExoPlayer = ExoPlayer.Builder(application).build()
     private val processor = AudioProcessor()
     
-    // State for the UI to observe
     private val _currentSong = MutableStateFlow<Song?>(null)
     val currentSong: StateFlow<Song?> = _currentSong
 
@@ -26,6 +27,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     private var visualizer: Visualizer? = null
 
+    // This annotation satisfies the Lint check for the audioSessionId API
+    @OptIn(UnstableApi::class)
     fun loadAndPlay(song: Song) {
         _currentSong.value = song
         val mediaItem = MediaItem.fromUri(song.uri)
@@ -33,6 +36,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         player.prepare()
         player.play()
         _isPlaying.value = true
+        
+        // Lint was failing here because audioSessionId is "Unstable"
         setupVisualizer(player.audioSessionId)
     }
 
@@ -67,7 +72,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
                 enabled = true
             }
         } catch (e: Exception) {
-            // Handle cases where audio session is unavailable
+            // Silently fail if visualizer cannot be attached
         }
     }
 
