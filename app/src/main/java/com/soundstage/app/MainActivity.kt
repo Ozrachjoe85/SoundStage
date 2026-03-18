@@ -3,23 +3,17 @@ package com.soundstage.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import com.soundstage.app.navigation.NavGraph
+import com.soundstage.app.ui.theme.SoundStageTheme
+import com.soundstage.app.ui.PlayerScreen
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    NavGraph()
-                }
+            SoundStageTheme {
+                // This launches your new Retro-Digital UI
+                PlayerScreen(viewModel = viewModel())
             }
         }
     }
