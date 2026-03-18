@@ -1,14 +1,16 @@
 package com.soundstage.app.audio
-import kotlin.math.sqrt
+
+import kotlin.math.hypot
 
 class FFTProcessor {
-    fun performFFT(data: FloatArray): FloatArray {
-        val magnitude = FloatArray(data.size / 2)
-        for (i in magnitude.indices) {
-            val re = data[2 * i]
-            val im = data[2 * i + 1]
-            magnitude[i] = sqrt(re * re + im * im)
+    fun getMagnitudes(fft: ByteArray): FloatArray {
+        val n = fft.size
+        val magnitudes = FloatArray(n / 2)
+        for (i in 0 until n / 2) {
+            val real = fft[i * 2].toFloat()
+            val imag = fft[i * 2 + 1].toFloat()
+            magnitudes[i] = hypot(real, imag)
         }
-        return magnitude
+        return magnitudes
     }
 }
