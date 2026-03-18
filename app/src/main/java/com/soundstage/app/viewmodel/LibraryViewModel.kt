@@ -1,31 +1,23 @@
 package com.soundstage.app.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.soundstage.app.data.MusicRepository
-import com.soundstage.app.data.models.Track
+import com.soundstage.app.data.Song
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class LibraryViewModel(private val repository: MusicRepository) : ViewModel() {
+class LibraryViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = MusicRepository(application.contentResolver)
+    
+    private val _songs = MutableStateFlow<List<Song>>(emptyList())
+    val songs: StateFlow<List<Song>> = _songs
 
-    private val _tracks = MutableStateFlow<List<Track>>(emptyList())
-    val tracks = _tracks.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(true)
-    val isLoading = _isLoading.asStateFlow()
-
-    init {
-        loadTracks()
-    }
-
-    fun loadTracks() {
+    fun loadLibrary() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _tracks.value = repository.getAllTracks()
-            _isLoading.value = false
+            _songs.value = repository.fetchSongs()
         }
     }
 }
-
