@@ -12,14 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -38,8 +34,6 @@ fun PlayerScreen(
 ) {
     val isPlaying by viewModel.isPlaying.collectAsState()
     val currentSong by viewModel.currentSong.collectAsState()
-    val position by viewModel.position.collectAsState()
-    val duration by viewModel.duration.collectAsState()
     
     val rackBg = Color(0xFF0D0F12)
     val panelBg = Color(0xFF1A1D23)
@@ -62,7 +56,6 @@ fun PlayerScreen(
             DisplayPanel(
                 songTitle = currentSong?.title ?: "NO SIGNAL",
                 artist = currentSong?.artist ?: "---",
-                album = currentSong?.album ?: "---",
                 accentColor = accentGreen
             )
             
@@ -74,18 +67,14 @@ fun PlayerScreen(
             
             // Timeline
             TimelinePanel(
-                position = position,
-                duration = duration,
                 accentColor = accentAmber
             )
             
             // Transport Controls
             TransportControlsPanel(
                 isPlaying = isPlaying,
-                onPlayPause = { viewModel.togglePlayPause() },
-                onPrevious = { viewModel.previousTrack() },
-                onNext = { viewModel.nextTrack() },
-                onStop = { viewModel.stop() },
+                onPlayPause = { viewModel.play() },
+                onStop = { /* Add stop method to ViewModel */ },
                 onOpenLibrary = onNavigateToLibrary,
                 accentColor = accentGreen,
                 stopColor = accentRed
@@ -98,7 +87,6 @@ fun PlayerScreen(
 fun DisplayPanel(
     songTitle: String,
     artist: String,
-    album: String,
     accentColor: Color
 ) {
     Column(
@@ -118,7 +106,7 @@ fun DisplayPanel(
             fontWeight = FontWeight.Bold
         )
         
-        // Main display (like a tape counter display)
+        // Main display
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -149,15 +137,6 @@ fun DisplayPanel(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                
-                Text(
-                    text = album,
-                    color = accentColor.copy(alpha = 0.5f),
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
@@ -168,7 +147,6 @@ fun TapeReelsPanel(
     isPlaying: Boolean,
     accentColor: Color
 ) {
-    // Infinite rotation when playing
     val infiniteTransition = rememberInfiniteTransition(label = "reel")
     val rotation by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -209,7 +187,7 @@ fun TapeReelsPanel(
                 label = "L"
             )
             
-            // Tape head indicator
+            // Tape head
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -303,7 +281,7 @@ fun TapeReel(
                     color = accentColor.copy(alpha = 0.2f),
                     radius = radius,
                     center = center,
-                    style = Stroke(width = 2.dp.toPx())
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
                 )
             }
         }
@@ -319,11 +297,7 @@ fun TapeReel(
 }
 
 @Composable
-fun TimelinePanel(
-    position: Long,
-    duration: Long,
-    accentColor: Color
-) {
+fun TimelinePanel(accentColor: Color) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -336,8 +310,8 @@ fun TimelinePanel(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            TimeDisplay(time = position, label = "POSITION", accentColor = accentColor)
-            TimeDisplay(time = duration - position, label = "REMAINING", accentColor = accentColor)
+            TimeDisplay(time = 0L, label = "POSITION", accentColor = accentColor)
+            TimeDisplay(time = 0L, label = "REMAINING", accentColor = accentColor)
         }
         
         // Progress bar
@@ -348,12 +322,10 @@ fun TimelinePanel(
                 .background(Color(0xFF0D0F12), RoundedCornerShape(4.dp))
                 .border(1.dp, Color(0xFF2A2F36), RoundedCornerShape(4.dp))
         ) {
-            val progress = if (duration > 0) position.toFloat() / duration.toFloat() else 0f
-            
             Box(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .fillMaxWidth(progress)
+                    .fillMaxWidth(0.0f)
                     .background(
                         Brush.horizontalGradient(
                             colors = listOf(
@@ -369,11 +341,7 @@ fun TimelinePanel(
 }
 
 @Composable
-fun TimeDisplay(
-    time: Long,
-    label: String,
-    accentColor: Color
-) {
+fun TimeDisplay(time: Long, label: String, accentColor: Color) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -417,8 +385,6 @@ private fun formatTime(millis: Long): String {
 fun TransportControlsPanel(
     isPlaying: Boolean,
     onPlayPause: () -> Unit,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
     onStop: () -> Unit,
     onOpenLibrary: () -> Unit,
     accentColor: Color,
@@ -446,13 +412,6 @@ fun TransportControlsPanel(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Previous
-            TransportButton(
-                label = "◄◄",
-                onClick = onPrevious,
-                color = accentColor
-            )
-            
             // Stop
             TransportButton(
                 label = "■",
@@ -466,13 +425,6 @@ fun TransportControlsPanel(
                 onClick = onPlayPause,
                 color = accentColor,
                 isActive = isPlaying
-            )
-            
-            // Next
-            TransportButton(
-                label = "►►",
-                onClick = onNext,
-                color = accentColor
             )
             
             // Library
