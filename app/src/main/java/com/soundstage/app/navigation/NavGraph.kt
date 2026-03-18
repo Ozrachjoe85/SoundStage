@@ -11,36 +11,38 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
-import com.soundstage.app.ui.theme.SoundStageThemeManager
+import com.soundstage.app.ui.theme.TacticalThemeManager
 import com.soundstage.app.viewmodel.*
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
-    val theme = SoundStageThemeManager.currentTheme
+    val theme = TacticalThemeManager.currentTheme
     val playerVm: PlayerViewModel = viewModel()
 
     Scaffold(
         bottomBar = {
-            NavigationBar(containerColor = theme.background) {
-                listOf("player", "library", "eq", "settings").forEach { route ->
+            NavigationBar(containerColor = theme.background, modifier = Modifier.height(60.dp)) {
+                listOf("DECK", "DATA", "CORE", "CONF").forEach { label ->
+                    val route = when(label) {
+                        "DECK" -> "player"
+                        "DATA" -> "library"
+                        "CORE" -> "eq"
+                        else -> "settings"
+                    }
                     NavigationBarItem(
                         selected = false,
                         onClick = { navController.navigate(route) },
-                        icon = { Text(route.take(1).uppercase(), color = theme.primary, fontFamily = FontFamily.Monospace) },
-                        label = { Text(route.uppercase(), color = theme.primary, fontSize = 8.sp) }
+                        icon = { Text("[$label]", color = theme.primary, fontSize = 11.sp, fontFamily = FontFamily.Monospace) }
                     )
                 }
             }
         }
     ) { padding ->
         NavHost(navController, "player", Modifier.padding(padding)) {
-            composable("player") { 
-                PlayerScreen(playerVm) { navController.navigate("library") } 
-            }
+            composable("player") { PlayerScreen(playerVm) { navController.navigate("library") } }
             composable("library") { 
-                val libVm: LibraryViewModel = viewModel()
-                LibraryScreen(libVm) { song ->
+                LibraryScreen(viewModel()) { song -> 
                     playerVm.loadAndPlay(song)
                     navController.navigate("player")
                 } 
