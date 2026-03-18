@@ -28,8 +28,6 @@ import kotlin.random.Random
 fun EQScreen(
     viewModel: EQViewModel = viewModel()
 ) {
-    val bands by viewModel.bands.collectAsState()
-    
     val rackBg = Color(0xFF0D0F12)
     val accentGreen = Color(0xFF00FF88)
     val accentBlue = Color(0xFF00F0FF)
@@ -45,10 +43,8 @@ fun EQScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Spectrum Analyzer
             SpectrumAnalyzerPanel(accentColor = accentGreen)
             
-            // Frequency Bands
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,11 +70,11 @@ fun EQScreen(
                 ) {
                     val frequencies = listOf("60", "150", "400", "1k", "2.4k", "6k", "10k", "16k")
                     
-                    bands.take(8).forEachIndexed { index, band ->
+                    repeat(8) { index ->
                         MiniVerticalSlider(
-                            label = frequencies.getOrElse(index) { "${index + 1}" },
-                            value = band.gain,
-                            onChange = { /* viewModel.setBandGain(index, it) */ },
+                            label = frequencies[index],
+                            value = 0.5f,
+                            onChange = { },
                             accentColor = accentBlue
                         )
                     }
