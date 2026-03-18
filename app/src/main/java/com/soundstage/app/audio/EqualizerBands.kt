@@ -1,3 +1,4 @@
+import kotlin.math.pow
 package com.soundstage.app.audio
 
 data class EQBand(
