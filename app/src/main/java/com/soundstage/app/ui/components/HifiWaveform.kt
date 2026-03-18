@@ -2,47 +2,43 @@ package com.soundstage.app.ui
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import com.soundstage.app.ui.theme.SoundStageThemeManager
+import androidx.compose.ui.unit.dp
+import com.soundstage.app.ui.theme.TacticalThemeManager
 import com.soundstage.app.viewmodel.PlayerViewModel
 
 @Composable
 fun HifiWaveform(viewModel: PlayerViewModel) {
-    val theme = SoundStageThemeManager.currentTheme
+    val theme = TacticalThemeManager.currentTheme
     val magnitudes by viewModel.visualizerData.collectAsState()
 
-    Canvas(modifier = Modifier.fillMaxSize()) {
-        val barWidth = size.width / (magnitudes.size * 2)
+    Canvas(modifier = Modifier.fillMaxSize().padding(12.dp)) {
+        val barWidth = size.width / (magnitudes.size)
         val centerY = size.height / 2
 
         magnitudes.forEachIndexed { index, mag ->
-            val height = (mag * 2.5f).coerceIn(4f, centerY)
+            // Scale the magnitude for a more dramatic tactical readout
+            val h = (mag * 3.0f).coerceIn(2f, centerY)
             
-            // Draw Top (Normal)
-            drawRect(
-                color = theme.primary,
-                topLeft = Offset(size.width / 2 + (index * barWidth), centerY - height),
-                size = Size(barWidth - 4f, height)
-            )
-            drawRect(
-                color = theme.primary,
-                topLeft = Offset(size.width / 2 - (index * barWidth), centerY - height),
-                size = Size(barWidth - 4f, height)
-            )
+            // Redline check
+            val color = if (h > centerY * 0.82f) theme.hazard else theme.primary
 
-            // Draw Bottom (Mirror Reflection)
+            // Draw symmetrical stack (Top & Bottom)
             drawRect(
-                color = theme.primary.copy(alpha = 0.3f),
-                topLeft = Offset(size.width / 2 + (index * barWidth), centerY),
-                size = Size(barWidth - 4f, height / 2)
+                color = color,
+                topLeft = Offset(index * barWidth, centerY - h),
+                size = Size(barWidth - 4f, h * 2)
             )
+            
+            // Draw subtle "ghost" reflection
             drawRect(
-                color = theme.primary.copy(alpha = 0.3f),
-                topLeft = Offset(size.width / 2 - (index * barWidth), centerY),
-                size = Size(barWidth - 4f, height / 2)
+                color = color.copy(alpha = 0.1f),
+                topLeft = Offset(index * barWidth, centerY - (h * 1.2f)),
+                size = Size(barWidth - 4f, h * 2.4f)
             )
         }
     }
