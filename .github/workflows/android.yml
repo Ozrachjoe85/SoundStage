@@ -1,4 +1,32 @@
-# --- AUTOMATED ICON GENERATION (NO EXTERNAL FILES NEEDED) ---
+name: SoundStage Production CI
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build and Analyze
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Install Image Processing Tools
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
       - name: Create and Generate Mipmaps
         run: |
           # 1. Create a 512x512 Charcoal Background
@@ -21,5 +49,28 @@
             mkdir -p "$TARGET_DIR"
             convert ic_launcher_background.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_background.png"
             convert ic_launcher_foreground.png -resize "${SIZE}x${SIZE}" "$TARGET_DIR/ic_launcher_foreground.png"
+            # Create legacy combined icon
             convert "$TARGET_DIR/ic_launcher_background.png" "$TARGET_DIR/ic_launcher_foreground.png" -gravity center -composite "$TARGET_DIR/ic_launcher.png"
           done
+
+      - name: Grant Execute Permission
+        run: chmod +x gradlew
+
+      - name: Run Static Analysis (Lint)
+        run: ./gradlew lintDebug
+
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload Analysis Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+
+      - name: Store Production-Ready APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: soundstage-debug-build
+          path: app/build/outputs/apk/debug/app-debug.apk
