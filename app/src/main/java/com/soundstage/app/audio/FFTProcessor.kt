@@ -1,26 +1,19 @@
 package com.soundstage.app.audio
 
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.PI
 
 class FFTProcessor {
-
-    fun performFFT(input: FloatArray): FloatArray {
-        val n = input.size
-        val output = FloatArray(n)
-
-        for (k in 0 until n) {
-            var real = 0.0
-            var imag = 0.0
-
-            for (t in 0 until n) {
-                val angle = 2.0 * PI * t * k / n
-                real += input[t] * cos(angle)
-                imag -= input[t] * sin(angle)
-            }
-
-            output[k] = sqrt(real * real + imag * imag).toFloat()
+    fun performFFT(data: FloatArray): FloatArray {
+        // Simple magnitude calculation for visualization
+        // In a production build, you'd use a dedicated FFT library like JTransforms
+        val magnitude = FloatArray(data.size / 2)
+        for (i in magnitude.indices) {
+            val re = data[2 * i]
+            val im = data[2 * i + 1]
+            magnitude[i] = kotlin.math.sqrt(re * re + im * im)
         }
-
-        return output
+        return magnitude
     }
 }
