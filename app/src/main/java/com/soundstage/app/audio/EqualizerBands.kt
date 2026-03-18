@@ -1,25 +1,24 @@
-import kotlin.math.pow
 package com.soundstage.app.audio
+
+import kotlin.math.pow
 
 data class EQBand(
     val frequency: Float,
-    var gain: Float = 0f
+    val gain: Float,
+    val isBypassed: Boolean = false
 )
 
 object EqualizerBands {
-
-    fun createBands(count: Int = 32): List<EQBand> {
-        val bands = mutableListOf<EQBand>()
-
-        val minFreq = 20f
-        val maxFreq = 20000f
-
-        for (i in 0 until count) {
-            val fraction = i.toFloat() / count
-            val freq = minFreq * (maxFreq / minFreq).pow(fraction)
-            bands.add(EQBand(freq))
-        }
-
-        return bands
-    }
+    val defaultBands = listOf(
+        EQBand(32f, 0f),
+        EQBand(64f, 0f),
+        EQBand(125f, 0f),
+        EQBand(250f, 0f),
+        EQBand(500f, 0f),
+        EQBand(1000f, 0f),
+        EQBand(2000f, 0f),
+        EQBand(4000f, 0f),
+        EQBand(8000f, 0f),
+        EQBand(16000f, 0f)
+    )
 }
