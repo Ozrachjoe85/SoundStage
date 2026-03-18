@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import com.soundstage.app.data.MusicRepository
+import androidx.compose.foundation.clickable
 
 @Composable
 fun LibraryScreen(navController: NavController) {
