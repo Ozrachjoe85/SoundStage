@@ -16,119 +16,66 @@ import androidx.compose.ui.unit.sp
 import com.soundstage.app.viewmodel.PlayerViewModel
 
 @Composable
-fun PlayerScreen(
-    viewModel: PlayerViewModel,
-    onOpenLibrary: () -> Unit
-) {
+fun PlayerScreen(viewModel: PlayerViewModel) {
     val currentSong by viewModel.currentSong.collectAsState()
     val isPlaying by viewModel.isPlaying.collectAsState()
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF121212)) // Charcoal Background
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(Color(0xFF0A0A0B)).padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. Top Navigation Bar
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        // CRT Visualizer Monitor
+        Box(
+            modifier = Modifier.fillMaxWidth().height(220.dp).background(Color(0xFF050505))
         ) {
-            Text(
-                text = "SOUNDSTAGE // V1.0",
-                color = Color(0xFF00FF88).copy(alpha = 0.5f),
-                fontSize = 10.sp,
-                fontFamily = FontFamily.Monospace
-            )
-            Button(
-                onClick = onOpenLibrary,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
-            ) {
-                Text("BROWSE", color = Color(0xFF00FF88), fontSize = 12.sp)
+            SegmentedVisualizer(isPlaying)
+            // CRT Scanline Overlay
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                for (i in 0 until size.height.toInt() step 8) {
+                    drawLine(Color.Black.copy(alpha = 0.3f), Offset(0f, i.toFloat()), Offset(size.width, i.toFloat()))
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // 2. Phosphor Visualizer Area
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .background(Color(0xFF0A0A0A)),
-            contentAlignment = Alignment.Center
-        ) {
-            PhosphorVisualizer(isPlaying = isPlaying)
+        // Segmented Track Readout
+        Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
+            Text(currentSong?.title?.uppercase() ?: "NO_DATA", color = Color(0xFF00FF88), fontSize = 24.sp, fontFamily = FontFamily.Monospace)
+            Text(currentSong?.artist?.uppercase() ?: "IDLE", color = Color(0xFF004422), fontSize = 14.sp, fontFamily = FontFamily.Monospace)
         }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        // 3. Track Metadata
-        Text(
-            text = currentSong?.title?.uppercase() ?: "NO MEDIA LOADED",
-            color = Color(0xFF00FF88),
-            fontSize = 22.sp,
-            fontFamily = FontFamily.Monospace
-        )
-        Text(
-            text = currentSong?.artist?.uppercase() ?: "SYSTEM IDLE",
-            color = Color.Gray,
-            fontSize = 14.sp,
-            fontFamily = FontFamily.Monospace
-        )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // 4. Transport Controls
-        IconButton(
-            onClick = { viewModel.togglePlayback() },
-            modifier = Modifier
-                .size(80.dp)
-                .background(Color(0xFF1A1A1A), CircleShape)
-        ) {
-            // Simple Play/Pause ASCII-style icons
-            Text(
-                text = if (isPlaying) "||" else "▶",
-                color = Color(0xFF00FF88),
-                fontSize = 30.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(0.5f))
-
-        // 5. Analog Control Deck
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            AnalogDial(label = "INPUT GAIN")
-            AnalogDial(label = "MASTER VOL")
+        // The Transport Logic
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            AnalogDial("GAIN")
+            Spacer(modifier = Modifier.width(40.dp))
+            IconButton(
+                onClick = { viewModel.togglePlayback() },
+                modifier = Modifier.size(70.dp).background(Color(0xFF151516), CircleShape)
+            ) {
+                Text(if (isPlaying) "||" else ">>", color = Color(0xFF00FF88), fontSize = 20.sp)
+            }
+            Spacer(modifier = Modifier.width(40.dp))
+            AnalogDial("VOL")
         }
         
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(40.dp))
     }
 }
 
 @Composable
-fun PhosphorVisualizer(isPlaying: Boolean) {
-    // This draws a static grid/line. In the next step, we hook this to FFT data.
-    Canvas(modifier = Modifier.fillMaxSize().padding(10.dp)) {
-        val width = size.width
-        val height = size.height
-        val barCount = 20
-        val barSpacing = width / barCount
-
-        for (i in 0 until barCount) {
-            val x = i * barSpacing
-            // Random-ish heights for now to simulate activity
-            val barHeight = if (isPlaying) (20..height.toInt()).random().toFloat() else 5f
-            drawLine(
-                color = Color(0xFF00FF88),
-                start = Offset(x, height),
-                end = Offset(x, height - barHeight),
-                strokeWidth = 8f
+fun SegmentedVisualizer(isPlaying: Boolean) {
+    Canvas(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        val bars = 24
+        val spacing = size.width / bars
+        for (i in 0 until bars) {
+            val h = if (isPlaying) (20..size.height.toInt()).random().toFloat() else 10f
+            drawRect(
+                color = if (h > size.height * 0.7f) Color(0xFFFF3131) else Color(0xFF00FF88),
+                topLeft = Offset(i * spacing, size.height - h),
+                size = androidx.compose.ui.geometry.Size(spacing - 4f, h)
             )
         }
     }
@@ -137,29 +84,11 @@ fun PhosphorVisualizer(isPlaying: Boolean) {
 @Composable
 fun AnalogDial(label: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(70.dp)
-                .background(Color(0xFF222222), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            // Dial Indicator
+        Box(modifier = Modifier.size(50.dp).background(Color(0xFF151516), CircleShape)) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                val center = Offset(size.width / 2, size.height / 2)
-                drawLine(
-                    color = Color(0xFF00FF88),
-                    start = center,
-                    end = Offset(size.width / 2, 15f),
-                    strokeWidth = 4f
-                )
+                drawLine(Color(0xFF00FF88), center, Offset(size.width/2, 5f), 4f)
             }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = label,
-            color = Color.Gray,
-            fontSize = 10.sp,
-            fontFamily = FontFamily.Monospace
-        )
+        Text(label, color = Color(0xFF004422), fontSize = 10.sp, fontFamily = FontFamily.Monospace)
     }
 }
