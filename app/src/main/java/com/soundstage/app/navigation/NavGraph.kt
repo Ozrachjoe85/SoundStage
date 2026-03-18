@@ -14,9 +14,11 @@ fun NavGraph() {
             LibraryScreen(navController)
         }
 
+        
         composable("player") {
-            PlayerScreen(navController)
-        }
+    val viewModel: PlayerViewModel = viewModel() 
+    PlayerScreen(viewModel = viewModel)
+}
 
         composable("eq") {
             EqualizerScreen()
