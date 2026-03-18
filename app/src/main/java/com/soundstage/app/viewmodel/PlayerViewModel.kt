@@ -12,6 +12,7 @@ import com.soundstage.app.data.Song
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(UnstableApi::class) // This line satisfies the Lint error
 class PlayerViewModel(application: Application) : AndroidViewModel(application) {
     val player: ExoPlayer = ExoPlayer.Builder(application).build()
     private val processor = AudioProcessor()
@@ -27,8 +28,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
 
     private var visualizer: Visualizer? = null
 
-    // This annotation satisfies the Lint check for the audioSessionId API
-    @OptIn(UnstableApi::class)
     fun loadAndPlay(song: Song) {
         _currentSong.value = song
         val mediaItem = MediaItem.fromUri(song.uri)
@@ -36,8 +35,6 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application) 
         player.prepare()
         player.play()
         _isPlaying.value = true
-        
-        // Lint was failing here because audioSessionId is "Unstable"
         setupVisualizer(player.audioSessionId)
     }
 
