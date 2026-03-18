@@ -4,10 +4,8 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -16,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +32,6 @@ fun EQScreen(
     
     val rackBg = Color(0xFF0D0F12)
     val accentGreen = Color(0xFF00FF88)
-    val accentAmber = Color(0xFFFFB000)
     val accentBlue = Color(0xFF00F0FF)
     
     Box(
@@ -53,14 +49,41 @@ fun EQScreen(
             SpectrumAnalyzerPanel(accentColor = accentGreen)
             
             // Frequency Bands
-            FrequencyBandsPanel(
-                bands = bands,
-                onBandChange = { index, value ->
-                    // Update band value in ViewModel
-                    // viewModel.setBandValue(index, value)
-                },
-                accentColor = accentBlue
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color(0xFF1A1D23))
+                    .border(1.dp, Color(0xFF2A2F36))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "8-BAND PARAMETRIC EQUALIZER",
+                    color = Color(0xFF6B7280),
+                    fontSize = 10.sp,
+                    letterSpacing = 1.5.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    val frequencies = listOf("60", "150", "400", "1k", "2.4k", "6k", "10k", "16k")
+                    
+                    bands.take(8).forEachIndexed { index, band ->
+                        MiniVerticalSlider(
+                            label = frequencies.getOrElse(index) { "${index + 1}" },
+                            value = band.gain,
+                            onChange = { /* viewModel.setBandGain(index, it) */ },
+                            accentColor = accentBlue
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -110,7 +133,6 @@ fun SpectrumAnalyzerPanel(accentColor: Color) {
                 val barWidth = size.width / spectrumData.size
                 val maxHeight = size.height - 40.dp.toPx()
                 
-                // Grid lines
                 for (i in 0..5) {
                     val y = (size.height / 5) * i
                     drawLine(
@@ -121,7 +143,6 @@ fun SpectrumAnalyzerPanel(accentColor: Color) {
                     )
                 }
                 
-                // Spectrum bars
                 spectrumData.forEachIndexed { index, value ->
                     val x = index * barWidth
                     val barHeight = maxHeight * value
@@ -146,97 +167,6 @@ fun SpectrumAnalyzerPanel(accentColor: Color) {
                         size = Size(barWidth - 2.dp.toPx(), barHeight)
                     )
                 }
-            }
-        }
-        
-        // Peak indicators
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            PeakIndicator(label = "BASS", level = 0.7f, color = accentColor)
-            PeakIndicator(label = "MID", level = 0.5f, color = accentColor)
-            PeakIndicator(label = "HIGH", level = 0.6f, color = accentColor)
-        }
-    }
-}
-
-@Composable
-fun PeakIndicator(label: String, level: Float, color: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = label,
-            color = Color(0xFF6B7280),
-            fontSize = 9.sp,
-            fontFamily = FontFamily.Monospace
-        )
-        
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            repeat(10) { index ->
-                Box(
-                    modifier = Modifier
-                        .size(width = 8.dp, height = 20.dp)
-                        .background(
-                            if ((index / 10f) < level) {
-                                when {
-                                    index >= 8 -> Color(0xFFFF0033)
-                                    index >= 6 -> Color(0xFFFFB000)
-                                    else -> color
-                                }
-                            } else {
-                                Color(0xFF1A1D23)
-                            },
-                            RoundedCornerShape(1.dp)
-                        )
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FrequencyBandsPanel(
-    bands: List<Float>,
-    onBandChange: (Int, Float) -> Unit,
-    accentColor: Color
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF1A1D23))
-            .border(1.dp, Color(0xFF2A2F36))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "8-BAND PARAMETRIC EQUALIZER",
-            color = Color(0xFF6B7280),
-            fontSize = 10.sp,
-            letterSpacing = 1.5.sp,
-            fontFamily = FontFamily.Monospace,
-            fontWeight = FontWeight.Bold
-        )
-        
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            val frequencies = listOf("60", "150", "400", "1k", "2.4k", "6k", "10k", "16k")
-            
-            bands.take(8).forEachIndexed { index, value ->
-                MiniVerticalSlider(
-                    label = frequencies.getOrElse(index) { "${index + 1}" },
-                    value = value,
-                    onChange = { onBandChange(index, it) },
-                    accentColor = accentColor
-                )
             }
         }
     }
