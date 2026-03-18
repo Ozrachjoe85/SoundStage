@@ -1,39 +1,59 @@
 package com.soundstage.app
 
-import android.os.Bundle
 import android.Manifest
 import android.os.Build
+import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.ui.Alignment
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.soundstage.app.ui.PlayerScreen
 import com.soundstage.app.ui.theme.SoundStageTheme
 
 class MainActivity : ComponentActivity() {
-    
-    // Request notification permission for Android 13+ (Required for Audio Services)
-    private val requestPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { _ -> /* Handle result if needed */ }
+
+    // Helper to request all necessary permissions for an Audio App
+    private val permissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions.entries.all { it.value }
+        if (granted) {
+            // Permissions granted: The MusicRepository will now be able to scan files
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Define which permissions we need based on Android Version
+        val permissionsToRequest = mutableListOf<String>()
         
+        // Notification permission for the Playback Service (Android 13+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+            permissionsToRequest.add(Manifest.permission.READ_MEDIA_AUDIO)
+        } else {
+            // Legacy storage permission for older Androids
+            permissionsToRequest.add(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         setContent {
             SoundStageTheme {
-                Box(
+                // Launch permission request once the UI starts
+                LaunchedEffect(Unit) {
+                    permissionLauncher.launch(permissionsToRequest.toTypedArray())
+                }
+
+                Surface(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    color = androidx.compose.ui.graphics.Color(0xFF121212) // Charcoal Base
                 ) {
-                    Text(text = "SoundStage: System Ready", color = androidx.compose.ui.graphics.Color(0xFF00FF88))
+                    // This initializes the ViewModel and the Player UI
+                    PlayerScreen(viewModel = viewModel())
                 }
             }
         }
