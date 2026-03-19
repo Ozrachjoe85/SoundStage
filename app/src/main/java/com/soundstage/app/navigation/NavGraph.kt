@@ -19,7 +19,7 @@ fun NavGraph() {
     val navController = rememberNavController()
     val theme = TacticalThemeManager.currentTheme
     val playerVm: PlayerViewModel = viewModel()
-
+    
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = theme.background, modifier = Modifier.height(60.dp)) {
@@ -41,11 +41,11 @@ fun NavGraph() {
     ) { padding ->
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { PlayerScreen(playerVm) { navController.navigate("library") } }
-            composable("library") { 
-                LibraryScreen(viewModel()) { song: Song -> 
+            composable("library") {
+                LibraryScreen(viewModel(), onSongClick = { song ->
                     playerVm.loadAndPlay(song)
                     navController.navigate("player")
-                } 
+                })
             }
             composable("eq") { EQScreen(viewModel()) }
             composable("settings") { SettingsScreen() }
