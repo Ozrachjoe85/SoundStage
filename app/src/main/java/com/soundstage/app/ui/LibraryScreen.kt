@@ -35,7 +35,6 @@ fun LibraryScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Header
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,7 +84,6 @@ fun LibraryScreen(
                 }
             }
             
-            // Content
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
