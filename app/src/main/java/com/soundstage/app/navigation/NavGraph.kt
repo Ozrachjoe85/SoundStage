@@ -1,5 +1,6 @@
 package com.soundstage.app.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,14 +13,13 @@ import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
 import com.soundstage.app.ui.theme.TacticalThemeManager
 import com.soundstage.app.viewmodel.*
-import com.soundstage.app.data.Song
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
     val theme = TacticalThemeManager.currentTheme
     val playerVm: PlayerViewModel = viewModel()
-    
+
     Scaffold(
         bottomBar = {
             NavigationBar(containerColor = theme.background, modifier = Modifier.height(60.dp)) {
@@ -41,11 +41,11 @@ fun NavGraph() {
     ) { padding ->
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { PlayerScreen(playerVm) { navController.navigate("library") } }
-            composable("library") {
-                LibraryScreen(viewModel(), onSongClick = { song ->
+            composable("library") { 
+                LibraryScreen(viewModel(), onSongClick = { song -> 
                     playerVm.loadAndPlay(song)
                     navController.navigate("player")
-                })
+                }) 
             }
             composable("eq") { EQScreen(viewModel()) }
             composable("settings") { SettingsScreen() }
