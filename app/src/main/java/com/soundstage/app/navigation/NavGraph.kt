@@ -42,7 +42,7 @@ fun NavGraph() {
         NavHost(navController, "player", Modifier.padding(padding)) {
             composable("player") { PlayerScreen(playerVm) { navController.navigate("library") } }
             composable("library") { 
-                LibraryScreen(viewModel(), onSongClick = { song -> 
+                LibraryScreen(viewModel(), onTrackSelected = { song -> 
                     playerVm.loadAndPlay(song)
                     navController.navigate("player")
                 }) 
