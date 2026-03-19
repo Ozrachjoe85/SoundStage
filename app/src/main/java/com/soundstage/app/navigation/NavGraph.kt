@@ -1,6 +1,5 @@
 package com.soundstage.app.navigation
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -13,7 +12,7 @@ import androidx.navigation.compose.*
 import com.soundstage.app.ui.*
 import com.soundstage.app.ui.theme.TacticalThemeManager
 import com.soundstage.app.viewmodel.*
-import com.soundstage.app.data.models.Song
+import com.soundstage.app.data.Song
 
 @Composable
 fun NavGraph() {
