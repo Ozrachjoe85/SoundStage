@@ -1,41 +1,112 @@
-package com.soundstage.app
+package com.soniclab.app
 
-import android.Manifest
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.soundstage.app.navigation.NavGraph // Resolved
-import com.soundstage.app.ui.modifiers.CRTOverlay
-import com.soundstage.app.ui.theme.SoundStageTheme
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.soniclab.app.ui.screens.*
+import com.soniclab.app.ui.theme.SonicLabTheme
+import com.soniclab.app.ui.theme.sonicColors
+import com.soniclab.app.util.PermissionHandler
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { _ -> }
-
+    
+    private lateinit var permissionHandler: PermissionHandler
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        permissionHandler = PermissionHandler(this) { granted ->
+            // Permission handled by ViewModel
+        }
+        
+        if (!permissionHandler.hasPermissions(this)) {
+            permissionHandler.requestPermissions()
+        }
+        
         setContent {
-            SoundStageTheme {
-                LaunchedEffect(Unit) {
-                    val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        permissions.add(Manifest.permission.READ_MEDIA_AUDIO)
-                    }
-                    permissionLauncher.launch(permissions.toTypedArray())
-                }
+            SonicLabTheme {
+                MainScreen()
+            }
+        }
+    }
+}
 
-                Box(modifier = Modifier.fillMaxSize()) {
-                    NavGraph()
-                    CRTOverlay()
+sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object NowPlaying : Screen("now_playing", "Playing", Icons.Default.PlayArrow)
+    object Collection : Screen("collection", "Library", Icons.Default.LibraryMusic)
+    object Equalizer : Screen("equalizer", "EQ", Icons.Default.Tune)
+    object Visuals : Screen("visuals", "Visuals", Icons.Default.GraphicEq)
+    object Settings : Screen("settings", "Settings", Icons.Default.Settings)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MainScreen() {
+    val colors = sonicColors
+    var selectedScreen by remember { mutableStateOf<Screen>(Screen.NowPlaying) }
+    
+    val screens = listOf(
+        Screen.NowPlaying,
+        Screen.Collection,
+        Screen.Equalizer,
+        Screen.Visuals,
+        Screen.Settings
+    )
+    
+    Scaffold(
+        containerColor = colors.background,
+        bottomBar = {
+            NavigationBar(
+                containerColor = colors.surface,
+                contentColor = colors.textPrimary
+            ) {
+                screens.forEach { screen ->
+                    NavigationBarItem(
+                        icon = { 
+                            Icon(
+                                screen.icon, 
+                                contentDescription = screen.title,
+                                tint = if (selectedScreen == screen) colors.primary else colors.textSecondary
+                            )
+                        },
+                        label = { 
+                            Text(
+                                screen.title,
+                                color = if (selectedScreen == screen) colors.primary else colors.textSecondary
+                            )
+                        },
+                        selected = selectedScreen == screen,
+                        onClick = { selectedScreen = screen },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = colors.primary,
+                            selectedTextColor = colors.primary,
+                            unselectedIconColor = colors.textSecondary,
+                            unselectedTextColor = colors.textSecondary,
+                            indicatorColor = colors.primary.copy(alpha = 0.1f)
+                        )
+                    )
                 }
+            }
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            when (selectedScreen) {
+                Screen.NowPlaying -> NowPlayingScreen()
+                Screen.Collection -> CollectionScreen(
+                    onNavigateToNowPlaying = { selectedScreen = Screen.NowPlaying }
+                )
+                Screen.Equalizer -> EqualizerScreen()
+                Screen.Visuals -> VisualsScreen()
+                Screen.Settings -> SettingsScreen()
             }
         }
     }
